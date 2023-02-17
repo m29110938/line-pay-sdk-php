@@ -5,10 +5,20 @@ require __DIR__ . '/_config.php';
 // Get Base URL path without filename
 $baseUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]".dirname($_SERVER['PHP_SELF']);
 $input = $_POST;
+// $input['isSandbox'] = (isset($input['isSandbox'])) ? true : true;
 $input['isSandbox'] = (isset($input['isSandbox'])) ? true : false;
+
+// test
+// $_SESSION['config']['channelId'] = "1657830205";
+// $_SESSION['config']['channelSecret'] = "1bb904cdddf58244de0f2809a8999c72";
+// $config = $_SESSION['config'];
+// $channelId = "1657830205";
+// $channelSecret = "1bb904cdddf58244de0f2809a8999c72";
 
 // Create LINE Pay client
 $linePay = new \yidas\linePay\Client([
+    // 'channelId' => $config['channelId'],
+    // 'channelSecret' => $config['channelSecret'],
     'channelId' => $input['channelId'],
     'channelSecret' => $input['channelSecret'],
     'isSandbox' => $input['isSandbox'], 
@@ -18,7 +28,8 @@ $linePay = new \yidas\linePay\Client([
 $orderParams = [
     "amount" => (integer) $input['amount'],
     "currency" => $input['currency'],
-    "orderId" => "SN" . date("YmdHis") . (string) substr(round(microtime(true) * 1000), -3),
+    "orderId" => $input['orderId'],
+    // "orderId" => "SN" . date("YmdHis") . (string) substr(round(microtime(true) * 1000), -3),
     "packages" => [
         [
             "id" => "pid",
@@ -29,7 +40,7 @@ $orderParams = [
                     "name" => $input['productName'],
                     "quantity" => 1,
                     "price" => (integer) $input['amount'],
-                    "imageUrl" => 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/LINE_logo.svg/220px-LINE_logo.svg.png',
+                    "imageUrl" => 'https://hcparking.jotangi.net/parking_yunlin/assets/img/LOGO.png',
                 ],
             ],
         ],
@@ -51,6 +62,9 @@ $response = $linePay->request($orderParams);
 // Check Reserve API result
 if (!$response->isSuccessful()) {
     die("<script>alert('ErrorCode {$response['returnCode']}: " . addslashes($response['returnMessage']) . "');history.back();</script>");
+    // $transactionId = $response["info"]["transactionId"];
+
+
 }
 
 // Save the order info to session for confirm
